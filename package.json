@@ -1,18 +1,16 @@
 {
-  "name": "chai-backend",
+  "name": "aryan-funtube",
   "version": "1.0.0",
-  "description": "a backend at chai aur code channel - youtube",
+  "description": "A large scale project, great to learn",
   "type": "module",
   "main": "index.js",
   "scripts": {
     "dev": "nodemon -r dotenv/config --experimental-json-modules src/index.js"
   },
   "keywords": [
-    "javascript",
-    "backend",
-    "chai"
+    "backend"
   ],
-  "author": "Hitesh Choudhary",
+  "author": "Aryan Bola",
   "license": "ISC",
   "devDependencies": {
     "nodemon": "^3.0.1",
