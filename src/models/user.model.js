@@ -48,6 +48,7 @@ const UserSchema = new Schema({
   timestamps:true 
 })
 
+//if password is ever modified then the new password is hashed by this, even when first setup
 UserSchema.pre("save", async function(next){
   if(!this.isModified("password")) return next()
   
@@ -55,10 +56,15 @@ UserSchema.pre("save", async function(next){
   next()
 })
 
+//checking the password
 userSchema.methods.isPasswordCorrect = async function(password){
   return await bcrypt.compare(password, this.password)
 }
 
+//we are enterign the data for the token which we used to do in the sign up/sign in section we are doing it here directly
+//expire time should be kept in curly braces
+
+//access token are short lived but refresh token are long lived
 userSchema.methods.generateAccessToken = function(){
   return jwt.sign(
       {
