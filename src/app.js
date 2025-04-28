@@ -23,6 +23,5 @@ app.use(cookieParser())
 import userRouter from './routes/user.routes.js'
 
 app.use('/api/v1/users',userRouter)
-console.log("User routes registered at /api/v1/users");
 
 export { app }

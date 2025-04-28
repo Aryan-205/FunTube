@@ -1,6 +1,8 @@
 import mongoose from "mongoose";
 const Schema = mongoose.Schema
 
+import bcrypt from 'bcrypt'
+
 const UserSchema = new Schema({
   username:{
     type:String,
@@ -18,7 +20,7 @@ const UserSchema = new Schema({
     trim:true,
     indes:true
   },
-  fullname:{
+  fullName:{
     type:String,
     required:true,
     trim:true,
@@ -52,12 +54,12 @@ const UserSchema = new Schema({
 UserSchema.pre("save", async function(next){
   if(!this.isModified("password")) return next()
   
-  this.password=bcrypt.hash(this.password,10)
+  this.password= await bcrypt.hash(this.password,10)
   next()
 })
 
 //checking the password
-userSchema.methods.isPasswordCorrect = async function(password){
+UserSchema.methods.isPasswordCorrect = async function(password){
   return await bcrypt.compare(password, this.password)
 }
 
@@ -65,7 +67,7 @@ userSchema.methods.isPasswordCorrect = async function(password){
 //expire time should be kept in curly braces
 
 //access token are short lived but refresh token are long lived
-userSchema.methods.generateAccessToken = function(){
+UserSchema.methods.generateAccessToken = function(){
   return jwt.sign(
       {
           _id: this._id,
@@ -79,7 +81,7 @@ userSchema.methods.generateAccessToken = function(){
       }
   )
 }
-userSchema.methods.generateRefreshToken = function(){
+UserSchema.methods.generateRefreshToken = function(){
   return jwt.sign(
       {
           _id: this._id,
