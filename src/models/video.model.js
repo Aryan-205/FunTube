@@ -2,7 +2,7 @@
 import mongoose from "mongoose";
 const Schema = mongoose.Schema
 
-const Video = new Schema({
+const VideoSchema = new Schema({
   videoFile:{
     type:String,
     required:true,
@@ -40,4 +40,4 @@ const Video = new Schema({
 },{
   timestamps:true 
 })
-export const Videomodel = mongoose.model("Video",Video)
+export const Video = mongoose.model("Video",VideoSchema)
