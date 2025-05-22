@@ -97,11 +97,53 @@ const toggleCommentLike = asyncHandler(async (req, res) => {
 const toggleTweetLike = asyncHandler(async (req, res) => {
     const {tweetId} = req.params
     //TODO: toggle like on tweet
+
+    if(!tweetId){
+        throw new ApiError(400, "tweetId not foundj")
+    }
+
+    const userId = req.user.id
+
+    if (!tweetId || !isValidObjectId(tweetId)) {
+        throw new ApiError(400, "Missing or Invalid tweet id");
+    }
+
+    const existingLike =  await Like.findById({
+        tweet:tweetId,
+        likedBy:userId
+    })
+    let liked;
+
+    if(existingLike){
+        const deletedTweetLike =  await existingLike.deleteOne()
+
+        if (!deletedTweetLike) {
+            throw new ApiError(500, "Failed to unlike the tweet");
+        }
+        liked = false;
+    } else {
+        const likedTweet =  await Like.create({
+            tweet:tweetId,
+            likedBy:userId
+        })
+        if(likedTweet){
+            throw new ApiError(400, "Failed to like the tweet")
+        }
+        liked = true;
+    }
+
+    const totalLike =  await Like.countDocuments({tweet: tweetId})
+
+    return res.status(200).json(
+        new ApiResponse(200,{ tweetId, liked, totalLike },"tweet liked successfully")
+    )
 }
 )
 
 const getLikedVideos = asyncHandler(async (req, res) => {
     //TODO: get all liked videos
+
+    
 })
 
 export {
