@@ -53,6 +53,45 @@ const toggleCommentLike = asyncHandler(async (req, res) => {
     const {commentId} = req.params
     //TODO: toggle like on comment
 
+    if(!commentId){
+        throw new ApiError(400, "commentId not foundj")
+    }
+
+    const userId = req.user.id
+
+    if (!commentId || !isValidObjectId(commentId)) {
+        throw new ApiError(400, "Missing or Invalid comment id");
+    }
+
+    const existingLike =  await Like.findById({
+        comment:commentId,
+        likedBy:userId
+    })
+    let liked;
+
+    if(existingLike){
+        const deletedCommentLike =  await existingLike.deleteOne()
+
+        if (!deletedCommentLike) {
+            throw new ApiError(500, "Failed to unlike the comment");
+        }
+        liked = false;
+    } else {
+        const likedComment =  await Like.create({
+            comment:commentId,
+            likedBy:userId
+        })
+        if(likedComment){
+            throw new ApiError(400, "Failed to like the comment")
+        }
+        liked = true;
+    }
+
+    const totalLike =  await Like.countDocuments({comment: commentId})
+
+    return res.status(200).json(
+        new ApiResponse(200,{ commentId, liked, totalLike },"comment liked successfully")
+    )
 })
 
 const toggleTweetLike = asyncHandler(async (req, res) => {
