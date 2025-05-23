@@ -33,10 +33,50 @@ const createTweet = asyncHandler(async (req, res) => {
 
 const getUserTweets = asyncHandler(async (req, res) => {
     // TODO: get user tweets
+    const userId = req.user.id
+    if(!isValidObjectId(userId)){
+        throw new ApiError(400,"user not found")
+    }
+
+    const allTweet = await Tweet.findById(t=>t.owner == userId)
+    if(!allTweet){
+        throw new ApiError(400,"tweets not found")
+    }
+
+    return res.status(200).json(
+        new ApiResponse(200,allTweet,"all tweets extracted successfully")
+    )
 })
 
 const updateTweet = asyncHandler(async (req, res) => {
     //TODO: update tweet
+    const {tweetId,newContext} = req.body
+    if(!tweetId){
+        throw new ApiError(400,"tweet not found")
+    }
+    if(newContext.trim()==''){
+        throw new ApiError(400,"enter the context")
+    }
+
+    const userId = req.user.id
+    if(!isValidObjectId(userId)){
+        throw new ApiError(400,"user not found")
+    }
+
+    const tweet = await Tweet.findByIdAndUpdate(i=>(
+        i._id == tweetId && i.owner == userId
+        ),{
+            context:newContext,
+            owner:userId
+        }
+    )
+    if(!tweet){
+        throw new ApiError(400,"tweet not updated")
+    }
+
+    res.status(200).json(
+        new ApiResponse(200,tweet,"tweet updated successfully")
+    )
 })
 
 const deleteTweet = asyncHandler(async (req, res) => {
