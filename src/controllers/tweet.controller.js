@@ -8,7 +8,7 @@ import { useDeferredValue } from "react"
 
 const createTweet = asyncHandler(async (req, res) => {
     //TODO: create tweet
-    const context = req.body
+    const {context} = req.body
     if(!context){
         throw new ApiError(400,"context not found")
     }
@@ -32,6 +32,9 @@ const createTweet = asyncHandler(async (req, res) => {
 })
 
 const getUserTweets = asyncHandler(async (req, res) => {
+
+    // Have to add the pipeline
+
     // TODO: get user tweets
     const userId = req.user.id
     if(!isValidObjectId(userId)){
@@ -62,14 +65,27 @@ const updateTweet = asyncHandler(async (req, res) => {
     if(!isValidObjectId(userId)){
         throw new ApiError(400,"user not found")
     }
+    const tweet = await Tweet.findById(tweetId);
+
+    if (!tweet) {
+        throw new ApiError(400, "No such tweet found");
+    }
+
+    if (!tweet.owner.equals(userId)) {
+        throw new ApiError(403, "You are not allowed to update this tweet");
+    }
 
     const updatedTweet = await Tweet.findByIdAndUpdate(
-        tweetId,{
-            context:newContext,
-            owner:userId
-        }
-    )
-    if(!tweet){
+        tweetId,
+        {
+        $set: {
+            content,
+        },
+        },
+        { new: true }
+    );
+
+    if(!updatedTweet){
         throw new ApiError(400,"tweet not updated")
     }
 
@@ -88,6 +104,12 @@ const deleteTweet = asyncHandler(async (req, res) => {
     const userId = req.user.id
     if(!isValidObjectId(userId)){
         throw new ApiError(400,"user not found")
+    }
+
+    const tweet = await Tweet.findById(tweetId)
+
+    if (!tweet.owner.equals(userId)) {
+        throw new ApiError(403, "You are not allowed to delete this tweet");
     }
 
     const deletedTweet = await Tweet.findByIdAndRemove(tweetId)
