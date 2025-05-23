@@ -4,9 +4,31 @@ import {User} from "../models/user.model.js"
 import {ApiError} from "../utils/ApiError.js"
 import {ApiResponse} from "../utils/ApiResponse.js"
 import {asyncHandler} from "../utils/asyncHandler.js"
+import { useDeferredValue } from "react"
 
 const createTweet = asyncHandler(async (req, res) => {
     //TODO: create tweet
+    const context = req.body
+    if(!context){
+        throw new ApiError(400,"context not found")
+    }
+
+    const userId = req.user.id
+    if(!isValidObjectId(userId)){
+        throw new ApiError(400,"userId not found")
+    }
+    
+    const tweet = await User.create({
+        context,
+        owner:userId
+    })
+    if(!tweet){
+        throw new ApiError(400,"tweet creation unsuccessful")
+    }
+
+    return res.status(200).json(
+        new ApiResponse(200,tweet,"tweet posted successfully")
+    )
 })
 
 const getUserTweets = asyncHandler(async (req, res) => {
